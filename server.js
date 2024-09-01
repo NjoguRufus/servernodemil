@@ -3,6 +3,8 @@ const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
+require('dotenv').config(); // Add this line
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -40,8 +42,8 @@ app.post('/send-email', async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'Email sent successfully' });
     } catch (error) {
-        console.error('Error sending email:', error); // Log the full error object
-        res.status(500).json({ error: 'Failed to send email', details: error.toString() }); // Include error details in response
+        console.error('Error sending email:', error);
+        res.status(500).json({ error: 'Failed to send email', details: error.toString() });
     }
 });
 
