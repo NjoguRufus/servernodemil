@@ -1,28 +1,33 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-const cors = require('cors');
 const helmet = require('helmet');
-
+const cors = require('cors');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Use environment port if available
 
 // Middleware
-app.use(helmet()); // Secure headers
+app.use(helmet()); // Adds security headers
+app.use(cors()); // Enable CORS
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
+app.use(express.static('public')); // Serve static files from the 'public' directory
 
 // Contact form endpoint
 app.post('/send-email', async (req, res) => {
     const { name, email, message } = req.body;
 
+    // Validate input
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'All fields are required.' });
+    }
+
     // Create a transporter object with your email service configuration
     const transporter = nodemailer.createTransport({
         service: 'gmail', // Use your email service provider
         auth: {
-            user: 'rufusnjogu1@gmail.com', // Your email
-            pass: '*Njogu4400', // Your email password or app password
+            user: process.env.EMAIL_USER, // Your email
+            pass: process.env.EMAIL_PASS, // Your email password or app password
         },
     });
 
@@ -37,10 +42,10 @@ app.post('/send-email', async (req, res) => {
     try {
         // Send email
         await transporter.sendMail(mailOptions);
-        res.status(200).send('Email sent successfully');
+        res.status(200).json({ message: 'Email sent successfully' });
     } catch (error) {
         console.error('Error sending email:', error);
-        res.status(500).send('Error sending email');
+        res.status(500).json({ error: 'Failed to send email' });
     }
 });
 
